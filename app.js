@@ -1,3 +1,8 @@
+import Timer from './timer.js'
+
+const click1 = new Audio('click1.mp3')
+const click2 = new Audio('click2.mp3')
+
 const tempoDisplay = document.querySelector('.tempo')
 const tempoText = document.querySelector('.tempo-text')
 const decreaseTempoBtn = document.querySelector('.decrease-tempo')
@@ -10,6 +15,8 @@ const measureCount = document.querySelector('.measure-count')
 
 let bpm = 140
 let beatsPerMeasure = 4
+let count = 0
+let isRunning = false
 let tempoTextStr = 'Medium'
 
 decreaseTempoBtn.addEventListener('click', () => {
@@ -32,17 +39,33 @@ subtractBeats.addEventListener('click', () => {
   if (beatsPerMeasure <= 1) return
   beatsPerMeasure--
   measureCount.textContent = beatsPerMeasure
+  count = 0
 })
 addBeats.addEventListener('click', () => {
   if (beatsPerMeasure >= 12) return
   beatsPerMeasure++
   measureCount.textContent = beatsPerMeasure
+  count = 0
 })
 
-// Helper functions
+startStopBtn.addEventListener('click', () => {
+  count = 0
+  if (!isRunning) {
+    metronome.start()
+    isRunning = true
+    startStopBtn.textContent = 'STOP'
+  } else {
+    metronome.stop()
+    isRunning = false
+    startStopBtn.textContent = 'START'
+  }
+})
+
 function updateMetronome() {
   tempoDisplay.textContent = bpm
   tempoSlider.value = bpm
+  metronome.timeInterval = 60000 / bpm
+
   if (bpm > 40 && bpm <= 80) {
     tempoTextStr = 'Slow'
   }
@@ -61,3 +84,19 @@ function updateMetronome() {
 
   tempoText.textContent = tempoTextStr
 }
+
+function playClick() {
+  if (count === beatsPerMeasure) {
+    count = 0
+  }
+  if (count === 0) {
+    click1.play()
+    click1.currentTime = 0
+  } else {
+    click2.play()
+    click2.currentTime = 0
+  }
+  count++
+}
+
+const metronome = new Timer(playClick, 60000 / bpm, { immediate: true })
